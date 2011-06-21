@@ -11,8 +11,8 @@ namespace sli_users\controllers;
 use lithium\core\Libraries;
 use lithium\net\http\Media;
 use lithium\util\Set;
-use slicedup_core\configuration\LibraryRegistry;
-use slicedup_core\action\FlashMessage;
+use sli_util\action\FlashMessage;
+use sli_libs\core\LibraryRegistry;
 use sli_users\security\CurrentUser;
 
 /**
@@ -37,8 +37,8 @@ class UsersController extends \lithium\action\Controller {
 			if (isset($self->request->params['config'])) {
 				$self->runtime = LibraryRegistry::current('sli_users', $self->request->params['config']);
 			}
-			$baseConfig = LibraryRegistry::base('sli_users');
-			if (!isset($self->runtime) && !empty($baseConfig['controller']['actions'][$self->request->action])) {
+			$base = LibraryRegistry::base('sli_users.controller.actions');
+			if (!isset($self->runtime) && !empty($base[$self->request->action])) {
 				$class = get_class($self);
 				throw new \RuntimeException("{$class}::{$self->request->action} cannot be run without a runtime configuration.");
 			}

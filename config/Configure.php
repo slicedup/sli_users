@@ -2,7 +2,7 @@
 /**
  * Slicedup: a fancy tag line here
  *
- * @copyright	Copyright 2010, Paul Webster / Slicedup (http://slicedup.org)
+ * @copyright	Copyright 2011, Paul Webster / Slicedup (http://slicedup.org)
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
@@ -13,40 +13,39 @@ use lithium\storage\Session;
 use lithium\net\http\Router;
 
 /**
- * This `Configure` class is a configuration handling class for the sli_users library which
- * implements slicedup_core\registry\LibraryRegistry to define runtime configurations applied to
- * this library as described in ./config.php. This class is not intended for diect usage but to
- * be called by the LibraryRegistry initializing & altering config instances for this library
+ * This `Configure` class is a configuration handling class for the sli_users
+ * library which implements sli_libs\core\LibraryRegistry to define runtime
+ * configurations applied to this library as described in ./config.php. This
+ * class is not intended for direct usage but to be called by the
+ * LibraryRegistry initializing & altering config instances for this library.
  *
- * @todo: filters on all methods
  */
-class Configure implements \slicedup_core\configuration\LibraryRegistryInterface{
+class Configure {
 
 	/**
 	 * Format config for library instance
 	 *
 	 */
-	public static function add($config, $configName, $params, $library){
-
-		$configKeys = array_keys($config);
+	public static function add($configName, $config, $base){
+		$configKeys = array_keys($base);
 		extract($config);
 
 		//set string model
 		if (!is_array($model)) {
 			$model = array(
 				'class' => $model
-			) + $params['base']['model'];
+			) + $base['model'];
 		}
 		//set string controller
 		if (!is_array($controller)) {
 			$controller = array(
 				'class' => $controller
-			) + $params['base']['controller'];
+			) + $base['controller'];
 		}
 		//set string routing
 		if (!is_array($routing)) {
 			$routingBase = $routing;
-			$routing = $params['base']['routing'];
+			$routing = $base['routing'];
 			$routing['base'] = $routingBase;
 		}
 
@@ -83,7 +82,7 @@ class Configure implements \slicedup_core\configuration\LibraryRegistryInterface
 	 * Bootstrap library instance
 	 *
 	 */
-	public static function bootstrap($config, $configName, $params, $library) {
+	public static function bootstrap($configName, $config) {
 		$configKeys = array_keys($config);
 		extract($config);
 
@@ -120,7 +119,7 @@ class Configure implements \slicedup_core\configuration\LibraryRegistryInterface
 	 * Set up routes for library instance
 	 *
 	 */
-	public static function routes($config, $configName, $params, $library){
+	public static function routes($configName, $config){
 		extract($config);
 		$actions = array_filter($controller['actions']);
 		foreach ($actions as $action => $route) {
@@ -167,16 +166,4 @@ class Configure implements \slicedup_core\configuration\LibraryRegistryInterface
 		}
 		return $config;
 	}
-
-	/**
-	 * Unused interface method
-	 *
-	 */
-	public static function init($configBase, $configName, $params, $library){}
-
-	/**
-	 * Unused interface method
-	 *
-	 */
-	public static function remove($configRemoved, $configName, $params, $library){}
 }

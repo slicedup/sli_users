@@ -44,3 +44,5 @@ namespace sli_users\models;
  *
  */
 class Users extends \lithium\data\Model{}
+
+?>

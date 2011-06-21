@@ -6,6 +6,6 @@
  * @license 	http://opensource.org/licenses/bsd-license.php The BSD License
  */
 
-use slicedup_core\configuration\LibraryRegistry;
+use sli_libs\core\LibraryRegistry;
 
 LibraryRegistry::routes('sli_users');

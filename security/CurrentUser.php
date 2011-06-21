@@ -10,7 +10,7 @@ namespace sli_users\security;
 
 use lithium\security\Auth;
 use lithium\storage\Session;
-use slicedup_core\configuration\LibraryRegistry;
+use sli_libs\core\LibraryRegistry;
 
 /**
  * The `CurrentUser` class provides basic actions with the current application user. It is intended
