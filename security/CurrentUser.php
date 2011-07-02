@@ -40,7 +40,6 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 */
 	protected static $_classes = array(
 		'instance' => 'sli_users\security\CurrentUserInstance',
-		'registry' =>'sli_users\security\UserRegistry',
 		'permission' => null
 	);
 
@@ -100,7 +99,7 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @return mixed user | null
 	 */
 	public static function get($configName, $forceCheck = false, $options = array()){
-		$defaults = array('loadData' => true, 'field' => null);
+		$defaults = array('retrieve' => true, 'field' => null);
 		$options += $defaults;
 		if (!isset(static::$_users[$configName])) {
 			static::$_users[$configName] = null;
@@ -163,14 +162,14 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @return boolean
 	 */
 	public static function set($configName, &$user, $options = array()){
-		$defaults = array('persist' => null, 'getData' => true);
+		$defaults = array('persist' => null, 'retrieve' => true);
 		$options += $defaults;
 		if ($config = static::_config($configName)) {
 			extract($options, EXTR_SKIP);
 			static::$_users[$configName] = Auth::set($config['auth']['name'], $user, compact('persist'));
-			if ($getData && $user) {
-				$dataPath = $getData === true ? null : "$getData";
-				static::getData($configName, $dataPath, true);
+			if ($retrieve && $user) {
+				$dataPath = $retrieve === true ? null : "$retrieve";
+				static::retrieve($configName, $dataPath, true);
 			}
 			return true;
 		}
@@ -187,7 +186,7 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @return mixed user | null
 	 */
 	public static function login($configName, $userCredentials, $options = array()){
-		$defaults = array('persist' => false, 'getData' => true);
+		$defaults = array('persist' => false, 'retrieve' => true);
 		$options += $defaults;
 		if ($config = static::_config($configName)) {
 			extract($options, EXTR_SKIP);
@@ -206,12 +205,12 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @return boolean true | null
 	 */
 	public static function logout($configName, $options = array()){
-		$defaults = array('deleteData' => true);
+		$defaults = array('eliminate' => true);
 		$options += $defaults;
 		if ($config = static::_config($configName)) {
 			extract($options, EXTR_SKIP);
-			if ($deleteData) {
-				static::deleteData($configName);
+			if ($eliminate) {
+				static::eliminate($configName);
 			}
 			Auth::clear($config['auth']['name']);
 			return true;
@@ -323,11 +322,11 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 */
 	public static function data($configName, $path = null, $value = null){
 		if ($path === false) {
-			return static::deleteData($configName);
+			return static::eliminate($configName);
 		} elseif (isset($value)) {
-			return static::setData($configName, $path, $value);
+			return static::store($configName, $path, $value);
 		} else {
-			return static::getData($configName, $path);
+			return static::retrieve($configName, $path);
 		}
 	}
 
@@ -338,7 +337,7 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @param mixed $path optional null | string path
 	 * @param mixed $value optional
 	 */
-	public static function setData($configName, $path = null, $value = null){
+	public static function store($configName, $path = null, $value = null){
 		if ($config = static::_config($configName)) {
 			$id = static::id($configName);
 			$base = "$configName.$id";
@@ -350,10 +349,7 @@ class CurrentUser extends \lithium\core\StaticObject {
 			}
 			$auth = Auth::config($config['auth']['name']);
 			$sessionKey = "_{$auth['session']['key']}Data.{$path}";
-			$registry = static::$_classes['registry'];
-			$registry::set($path, $value);
-			$data = $registry::get($path);
-			return Session::write($sessionKey, $data, $auth['session']['options']);
+			return Session::write($sessionKey, $value, $auth['session']['options']);
 		}
 	}
 
@@ -364,22 +360,14 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @param mixed $path optional null | string path | array paths => values | boolean false
 	 * @param boolean $force optional
 	 */
-	public static function getData($configName, $path = null, $force = false){
+	public static function retrieve($configName, $path = null){
 		if ($config = static::_config($configName)) {
 			$id = static::id($configName);
 			$base = "$configName.$id";
 			$path = $path ? "$base.$path" : $base;
 			$auth = Auth::config($config['auth']['name']);
 			$sessionKey = "_{$auth['session']['key']}Data.{$path}";
-			$registry = static::$_classes['registry'];
-			$data = $registry::get($path);
-			if (!$data || $force) {
-				$data = Session::read($sessionKey, $auth['session']['options']);
-				if ($data) {
-					$registry::set($path, $data);
-					$data = $registry::get($path);
-				}
-			}
+			$data = Session::read($sessionKey, $auth['session']['options']);
 			return $data;
 		}
 	}
@@ -390,15 +378,13 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @param string $configName
 	 * @param mixed $path optional null | string path
 	 */
-	public static function deleteData($configName, $path = null){
+	public static function eliminate($configName, $path = null){
 		if ($config = static::_config($configName)) {
 			$id = static::id($configName);
 			$base = "$configName.$id";
 			$path = $path ? "$base.$path" : $base;
 			$auth = Auth::config($config['auth']['name']);
 			$sessionKey = "_{$auth['session']['key']}Data.{$path}";
-			$registry = static::$_classes['registry'];
-			$registry::delete($path);
 			return Session::delete($sessionKey, $auth['session']['options']);
 		}
 	}
@@ -546,15 +532,4 @@ class CurrentUserInstance extends \lithium\core\Object{
 	}
 }
 
-/**
- * The `UserRegistry` provides storage for arbitrary user data for `CurrentUser`
- */
-class UserRegistry extends \slicedup_core\configuration\Registry{
-
-	/**
-	 * Registry Data Storage
-	 *
-	 * @var array
-	 */
-	protected static $_storage = array();
-}
+?>
