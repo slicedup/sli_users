@@ -9,7 +9,7 @@
 namespace sli_users\controllers;
 
 use lithium\core\Libraries;
-use lithium\net\http\Media;
+use sli_util\net\http\MediaPaths;
 use lithium\util\Set;
 use sli_util\action\FlashMessage;
 use sli_libs\core\LibraryRegistry;
@@ -34,36 +34,31 @@ class UsersController extends \lithium\action\Controller {
 	protected function _init(){
 		parent::_init();
 		$this->applyFilter('__invoke', function($self, $params, $chain) {
-			if (isset($self->request->params['config'])) {
-				$self->runtime = LibraryRegistry::current('sli_users', $self->request->params['config']);
+			extract($params);
+			$action = $request->action;
+			$config = $configKey =  null;
+			if (!empty($request->params['config'])) {
+				$configKey = $request->params['config'];
+				$self->runtime = LibraryRegistry::current('sli_users', $configKey);
 			}
-			$base = LibraryRegistry::base('sli_users.controller.actions');
-			if (!isset($self->runtime) && !empty($base[$self->request->action])) {
-				$class = get_class($self);
-				throw new \RuntimeException("{$class}::{$self->request->action} cannot be run without a runtime configuration.");
+			if (!$self->runtime) {
+				$actionKey = "sli_users.controller.actions.{$action}";
+				$handledAction = LibraryRegistry::base($actionKey);
+				if ($handledAction) {
+					$class = get_class($self);
+					$exception = "{$class}::{$action} cannot be run without a runtime config.";
+					throw new \RuntimeException($exception);
+				}
 			}
-
+			$config = LibraryRegistry::get("sli_users.{$configKey}");
 			$library = Libraries::get('sli_users');
-			$htmlOptions = array(
-				'view' => '\lithium\template\View',
-				'paths' => array(
-					'template' => array(
-						'{:library}/views/{:controller}/{:template}.{:type}.php',
-						LITHIUM_APP_PATH . '/views/{:controller}/{:template}.{:type}.php',
-						$library['path'] . '/views/{:controller}/{:template}.{:type}.php',
-					),
-					'layout' => array(
-						'{:library}/views/layouts/{:layout}.{:type}.php',
-						LITHIUM_APP_PATH . '/views/layouts/{:layout}.{:type}.php',
-						$library['path'] . '/views/layouts/{:layout}.{:type}.php'
-					),
-					'element' => array(
-						'{:library}/views/elements/{:template}.{:type}.php',
-					)
+			MediaPaths::setDefaults('html');
+			MediaPaths::addPaths('html', array(
+				'template' => array(
+					"{:library}/views/{$configKey}/{:template}.{:type}.php",
+					$library['path'] . '/views/{:controller}/{:template}.{:type}.php',
 				)
-			);
-			$html = Media::type('html');
-			Media::type('html', $html['content'], Set::merge($html['options'], $htmlOptions));
+			), false);
 			return $chain->next($self, $params, $chain);
 		});
 	}
@@ -78,7 +73,7 @@ class UsersController extends \lithium\action\Controller {
 		}
 		$persist = ($this->runtime['persist'] && isset($this->request->data['remember_me']));
 		if ($user = CurrentUser::login($configName, $this->request, compact('persist'))) {
-			$this->redirect(CurrentUser::actionReturn($configName, 'login', false));
+			return $this->redirect(CurrentUser::actionReturn($configName, 'login', false));
 		}
 		if (isset($this->runtime['template']['login']['fields'])) {
 			$fields = $this->runtime['template']['login']['fields'];
