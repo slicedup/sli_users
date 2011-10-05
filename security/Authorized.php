@@ -13,11 +13,11 @@ use lithium\storage\Session;
 use sli_libs\core\LibraryRegistry;
 
 /**
- * The `CurrentUser` class provides basic actions with the current application user. It is intended
+ * The `User` class provides basic actions with the current application user. It is intended
  * for use with appplications utilising the sli_users library and is dependant on the runtime
  * configuration for all actions. All auth handling is passed through to \lithium\security\Auth
  */
-class CurrentUser extends \lithium\core\StaticObject {
+class Authorized extends \lithium\core\StaticObject {
 
 	/**
 	 * Instances
@@ -39,7 +39,7 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @var array
 	 */
 	protected static $_classes = array(
-		'instance' => 'sli_users\security\CurrentUserInstance',
+		'instance' => '\sli_users\security\User',
 		'permission' => null
 	);
 
@@ -68,6 +68,13 @@ class CurrentUser extends \lithium\core\StaticObject {
 			}
 		}
 		return static::$_instance[$configName];
+	}
+	
+	public static function config($configName){
+		if ($configName === null) {
+			$configName = LibraryRegistry::current('sli_users');
+		}
+		return LibraryRegistry::get("sli_users.$configName");
 	}
 
 	/**
@@ -130,7 +137,7 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @return mixed value of field
 	 */
 	public static function field($configName, $field, $value = null, $forceCheck = false){
-		if ($value && $user =& static::get($configName, $forceCheck)) {
+		if ($value && $user = static::get($configName, $forceCheck)) {
 			$user[$field] = $value;
 			return static::set($configName, $user);
 		}
@@ -161,7 +168,7 @@ class CurrentUser extends \lithium\core\StaticObject {
 	 * @param mixed $loadData optional load data from persistent storage boolean | string path
 	 * @return boolean
 	 */
-	public static function set($configName, &$user, $options = array()){
+	public static function set($configName, $user, $options = array()){
 		$defaults = array('persist' => null, 'retrieve' => true);
 		$options += $defaults;
 		if ($config = static::_config($configName)) {
@@ -443,92 +450,12 @@ class CurrentUser extends \lithium\core\StaticObject {
 	/**
 	 * Load passed config name
 	 *
+	 * @deprecated
 	 * @param string $configName
 	 * @return mixed config
 	 */
 	protected static function _config($configName){
-		if ($configName === null) {
-			$configName = LibraryRegistry::current('sli_users', null, true);
-		}
-		return LibraryRegistry::get("sli_users.$configName");
-	}
-}
-
-/**
- * The `CurrentUserInstance` class provides instnace based access to `CurrentUser` configurations
- *
- * @see CurrentUser::instance();
- */
-class CurrentUserInstance extends \lithium\core\Object{
-
-	/**
-	 * Instance config name
-	 *
-	 * @var string
-	 */
-	protected $_configName;
-
-	/**
-	 * Classname that instantiated this object that is used for all user actions
-	 *
-	 * @var string
-	 */
-	protected $_class = '\sli_users\security\CurrentUser';
-
-	/**
-	 * Class vars set by default from config array passed to constructor
-	 *
-	 * @var array
-	 */
-	protected $_autoConfig = array('configName', 'class');
-
-	/**
-	 * Returns user record array
-	 *
-	 * @param boolean $forceCheck
-	 * @return mixed user record array | null
-	 */
-	public function __invoke($forceCheck = false){
-		$class = $this->_class;
-		return $class::get($this->_configName, $forceCheck);
-	}
-
-	/**
-	 * Get user record var by key param
-	 *
-	 * @param string $param
-	 * @return mixed user record var | null
-	 */
-	public function __get($param){
-		$class = $this->_class;
-		return $class::field($this->_configName, $param);
-	}
-
-	/**
-	 * Set user record var by key param
-	 *
-	 * @param string $param
-	 * @return mixed user record var | null
-	 */
-	public function __set($param, $value){
-		$class = $this->_class;
-		return $class::field($this->_configName, $param, $value);
-	}
-
-	/**
-	 * Pass through to methods of the CurrentUser class as set in $this->_class
-	 * Prepends config from $this->_configName to args list
-	 *
-	 * @param string $method
-	 * @param array $args
-	 * @return mixed
-	 */
-	public function __call($method, $args){
-		$class = $this->_class;
-		if (is_callable(array($class, $method))) {
-			array_unshift($args, $this->_configName);
-			return call_user_func_array(array($class, $method), $args);
-		}
+		return static::config($configName);
 	}
 }
 

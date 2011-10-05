@@ -9,6 +9,10 @@
 use lithium\core\Libraries;
 use sli_libs\core\LibraryRegistry;
 
+if (!Libraries::get('sli_libs')) {
+	Libraries::add('sli_libs');
+}
+
 /**
  * Initialize LibraryRegistry to handle configuration
  */
@@ -45,7 +49,7 @@ LibraryRegistry::applyFilter('routes.sli_users', function($self, $params, $chain
  * app/config/slicedup.users.php
  */
 $library = Libraries::get('sli_users');
-$source = LITHIUM_APP_PATH . '/config/slicedup/config/sli.users.php';
+$source = LITHIUM_APP_PATH . '/config/sli_users.config.php';
 if (empty($library['registry']) && file_exists($source)) {
 	LibraryRegistry::add('sli_users', 'default', $source, array(
 		'load' => array('name' => 'default')

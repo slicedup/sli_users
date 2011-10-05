@@ -13,7 +13,7 @@ use sli_util\net\http\MediaPaths;
 use lithium\util\Set;
 use sli_util\action\FlashMessage;
 use sli_libs\core\LibraryRegistry;
-use sli_users\security\CurrentUser;
+use sli_users\security\Authorized;
 
 /**
  * The `UsersController` class is the base controller used for all actions of the sli_users
@@ -69,11 +69,11 @@ class UsersController extends \lithium\action\Controller {
 	public function login() {
 		$configName = $this->request->params['config'];
 		if (isset($this->request->query['return'])) {
-			CurrentUser::actionReturn($configName, 'login', $this->request->query['return']);
+			Authorized::actionReturn($configName, 'login', $this->request->query['return']);
 		}
 		$persist = ($this->runtime['persist'] && isset($this->request->data['remember_me']));
-		if ($user = CurrentUser::login($configName, $this->request, compact('persist'))) {
-			return $this->redirect(CurrentUser::actionReturn($configName, 'login', false));
+		if ($user = Authorized::login($configName, $this->request, compact('persist'))) {
+			return $this->redirect(Authorized::actionReturn($configName, 'login', false));
 		}
 		if (isset($this->runtime['template']['login']['fields'])) {
 			$fields = $this->runtime['template']['login']['fields'];
@@ -99,11 +99,11 @@ class UsersController extends \lithium\action\Controller {
 	public function logout() {
 		$configName = $this->request->params['config'];
 		if (isset($this->request->query['return'])) {
-			CurrentUser::actionReturn($configName, 'logout', $this->request->query['return']);
+			Authorized::actionReturn($configName, 'logout', $this->request->query['return']);
 		}
-		CurrentUser::logout($configName);
+		Authorized::logout($configName);
 		FlashMessage::success('You have been logged out.');
-		$this->redirect(CurrentUser::actionReturn($configName, 'logout', false));
+		$this->redirect(Authorized::actionReturn($configName, 'logout', false));
 	}
 
 	/**
