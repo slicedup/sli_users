@@ -59,6 +59,7 @@ class UsersController extends \lithium\action\Controller {
 					$library['path'] . '/views/{:controller}/{:template}.{:type}.php',
 				)
 			), false);
+			$self->set(compact('configKey'));
 			return $chain->next($self, $params, $chain);
 		});
 	}
