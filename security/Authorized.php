@@ -69,7 +69,7 @@ class Authorized extends \lithium\core\StaticObject {
 		}
 		return static::$_instance[$configName];
 	}
-	
+
 	public static function config($configName){
 		if ($configName === null) {
 			$configName = LibraryRegistry::current('sli_users');
@@ -241,7 +241,10 @@ class Authorized extends \lithium\core\StaticObject {
 		if ($actions === true || in_array($params['action'], (array) $actions)) {
 			$return = $returnUrl;
 			if ($return === null && $controller) {
-				$return = '/' . $controller->request->url;
+				$return = '/';
+				if ($controller->request->url != '/') {
+					$return.= $controller->request->url;
+				}
 			}
 			return static::action($configName, $controller, 'login', compact('return'));
 		}
