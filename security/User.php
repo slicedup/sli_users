@@ -27,7 +27,9 @@ class User extends \lithium\core\Object{
 	 *
 	 * @var string
 	 */
-	protected static $_class = '\sli_users\security\Authorized';
+	protected static $_classes = array(
+		'handler' => '\sli_users\security\Authorized'
+	);
 
 	/**
 	 * Class vars set by default from config array passed to constructor
@@ -38,7 +40,7 @@ class User extends \lithium\core\Object{
 
 	public static function &instance($configName, $forceCheck = false, $class = null){
 		if (is_null($class) || !class_exists($class)) {
-			$class = static::$_class;
+			$class = static::$_classes['handler'];
 		}
 		return $class::instance($configName, $forceCheck, get_called_class());
 	}
@@ -50,7 +52,7 @@ class User extends \lithium\core\Object{
 	 * @return mixed user record array | null
 	 */
 	public function __invoke($forceCheck = false){
-		$class = static::$_class;
+		$class = static::$_classes['handler'];
 		return $class::get($this->_configName, $forceCheck);
 	}
 
@@ -61,7 +63,7 @@ class User extends \lithium\core\Object{
 	 * @return mixed user record var | null
 	 */
 	public function __get($param){
-		$class = static::$_class;
+		$class = static::$_classes['handler'];
 		return $class::field($this->_configName, $param);
 	}
 
@@ -72,7 +74,7 @@ class User extends \lithium\core\Object{
 	 * @return mixed user record var | null
 	 */
 	public function __set($param, $value){
-		$class = static::$_class;
+		$class = static::$_classes['handler'];
 		return $class::field($this->_configName, $param, $value);
 	}
 
@@ -85,7 +87,7 @@ class User extends \lithium\core\Object{
 	 * @return mixed
 	 */
 	public function __call($method, $args){
-		$class = static::$_class;
+		$class = static::$_classes['handler'];
 		if (is_callable(array($class, $method))) {
 			array_unshift($args, $this->_configName);
 			return call_user_func_array(array($class, $method), $args);

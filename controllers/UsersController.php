@@ -27,6 +27,13 @@ class UsersController extends \lithium\action\Controller {
 	 * @var array
 	 */
 	public $runtime;
+	
+	/**
+	 * Runtime user instance
+	 * 
+	 * @var object
+	 */
+	public $_user;
 
 	/**
 	 * Init to set __invoke filter to load runtime config
@@ -51,6 +58,7 @@ class UsersController extends \lithium\action\Controller {
 				}
 			}
 			if ($self->runtime) {
+				$self->_user =& Authorized::instance($self->runtime['name'], false,  $self->runtime['class']); 
 				$library = Libraries::get('sli_users');
 				MediaPaths::setDefaults('html');
 				MediaPaths::addPaths('html', array(
@@ -59,7 +67,7 @@ class UsersController extends \lithium\action\Controller {
 						$library['path'] . '/views/{:controller}/{:template}.{:type}.php',
 					)
 				), false);
-				$self->set(compact('configKey'));
+				$self->set(array('sliUserConfig' => $configKey));
 			}
 			return $chain->next($self, $params, $chain);
 		});
@@ -69,13 +77,12 @@ class UsersController extends \lithium\action\Controller {
 	 * Login action
 	 */
 	public function login() {
-		$configName = $this->request->params['config'];
 		if (isset($this->request->query['return'])) {
-			Authorized::actionReturn($configName, 'login', $this->request->query['return']);
+			$this->_user->actionReturn('login', $this->request->query['return']);
 		}
 		$persist = ($this->runtime['persist'] && isset($this->request->data['remember_me']));
-		if ($user = Authorized::login($configName, $this->request, compact('persist'))) {
-			return $this->redirect(Authorized::actionReturn($configName, 'login', false));
+		if ($this->_user->login($this->request, compact('persist'))) {
+			return $this->redirect($this->_user->actionReturn('login', false));
 		}
 		if (isset($this->runtime['template']['login']['fields'])) {
 			$fields = $this->runtime['template']['login']['fields'];
@@ -99,13 +106,12 @@ class UsersController extends \lithium\action\Controller {
 	 * Logout action
 	 */
 	public function logout() {
-		$configName = $this->request->params['config'];
 		if (isset($this->request->query['return'])) {
-			Authorized::actionReturn($configName, 'logout', $this->request->query['return']);
+			$this->_user->actionReturn('logout', $this->request->query['return']);
 		}
-		Authorized::logout($configName);
+		$this->_user->logout();
 		FlashMessage::success('You have been logged out.');
-		$this->redirect(Authorized::actionReturn($configName, 'logout', false));
+		$this->redirect($this->_user->actionReturn('logout', false));
 	}
 
 	/**

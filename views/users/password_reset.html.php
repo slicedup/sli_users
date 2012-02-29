@@ -8,7 +8,7 @@
 
 $this->title('Password Reset');
 ?>
-<div class="sli-users sli-users-password_reset users-<?php echo $configKey;?>">
+<div class="sli-users sli-users-password_reset users-<?php echo $sliUserConfig;?>">
 <h3>Password Reset</h3>
 <?php
 	echo $this->form->create(null, array('action' => 'password_reset'));

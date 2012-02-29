@@ -8,7 +8,7 @@
 
 $this->title('Login');
 ?>
-<div class="sli-users sli-users-login users-<?php echo $configKey;?>">
+<div class="sli-users sli-users-login users-<?php echo $sliUserConfig;?>">
 <h3>Login</h3>
 <?php
 	echo $this->form->create(null, array('action' => 'login'));

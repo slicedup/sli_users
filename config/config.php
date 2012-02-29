@@ -14,6 +14,11 @@
 $config = array(
 
 	/**
+	 * User class
+	 */
+	'class' => 'sli_users\security\User',
+
+	/**
 	 * Model for user process data string class name | array keys:
 	 *  - class model class name fully namespaced,
 	 *  - meta any params to pass to Model::meta()
