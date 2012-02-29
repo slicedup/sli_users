@@ -12,7 +12,7 @@ use lithium\core\Libraries;
 use sli_util\net\http\MediaPaths;
 use lithium\util\Set;
 use sli_util\action\FlashMessage;
-use sli_libs\core\LibraryRegistry;
+use sli_util\storage\Registry;
 use sli_users\security\Authorized;
 
 /**
@@ -39,27 +39,28 @@ class UsersController extends \lithium\action\Controller {
 			$config = $configKey =  null;
 			if (!empty($request->params['config'])) {
 				$configKey = $request->params['config'];
-				$self->runtime = LibraryRegistry::current('sli_users', $configKey);
+				$self->runtime = Registry::get("sli_users.{$configKey}");
 			}
 			if (!$self->runtime) {
-				$actionKey = "sli_users.controller.actions.{$action}";
-				$handledAction = LibraryRegistry::base($actionKey);
-				if ($handledAction) {
+				$actionKey = "sli_users.{$configKey}.controller.actions.{$action}";
+				$handledAction = Registry::get($actionKey);
+				if (isset($handledAction)) {
 					$class = get_class($self);
 					$exception = "{$class}::{$action} cannot be run without a runtime config.";
 					throw new \RuntimeException($exception);
 				}
 			}
-			$config = LibraryRegistry::get("sli_users.{$configKey}");
-			$library = Libraries::get('sli_users');
-			MediaPaths::setDefaults('html');
-			MediaPaths::addPaths('html', array(
-				'template' => array(
-					"{:library}/views/{$configKey}/{:template}.{:type}.php",
-					$library['path'] . '/views/{:controller}/{:template}.{:type}.php',
-				)
-			), false);
-			$self->set(compact('configKey'));
+			if ($self->runtime) {
+				$library = Libraries::get('sli_users');
+				MediaPaths::setDefaults('html');
+				MediaPaths::addPaths('html', array(
+					'template' => array(
+						"{:library}/views/{$configKey}/{:template}.{:type}.php",
+						$library['path'] . '/views/{:controller}/{:template}.{:type}.php',
+					)
+				), false);
+				$self->set(compact('configKey'));
+			}
 			return $chain->next($self, $params, $chain);
 		});
 	}

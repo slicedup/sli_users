@@ -10,7 +10,7 @@ namespace sli_users\security;
 
 use lithium\security\Auth;
 use lithium\storage\Session;
-use sli_libs\core\LibraryRegistry;
+use sli_util\storage\Registry;
 
 /**
  * The `User` class provides basic actions with the current application user. It is intended
@@ -72,9 +72,9 @@ class Authorized extends \lithium\core\StaticObject {
 
 	public static function config($configName){
 		if ($configName === null) {
-			$configName = LibraryRegistry::current('sli_users');
+			$configName = key(Registry::get('sli_users'));
 		}
-		return LibraryRegistry::get("sli_users.$configName");
+		return Registry::get("sli_users.$configName");
 	}
 
 	/**
@@ -152,7 +152,7 @@ class Authorized extends \lithium\core\StaticObject {
 	 */
 	public static function all($forceCheck = false){
 		$users = array();
-		if ($keys = LibraryRegistry::keys('sli_users')) {
+		if ($keys = Registry::keys('sli_users')) {
 			foreach ($keys as $config) {
 				$users[$config] = static::get($config);
 			}
