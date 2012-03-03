@@ -80,7 +80,7 @@ class UsersController extends \lithium\action\Controller {
 		if (isset($this->request->query['return'])) {
 			$this->_user->actionReturn('login', $this->request->query['return']);
 		}
-		$persist = ($this->runtime['persist'] && isset($this->request->data['remember_me']));
+		$persist = ($this->runtime['persist'] && !empty($this->request->data['remember_me']));
 		if ($this->_user->login($this->request, compact('persist'))) {
 			return $this->redirect($this->_user->actionReturn('login', false));
 		}
