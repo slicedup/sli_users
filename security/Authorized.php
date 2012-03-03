@@ -108,20 +108,26 @@ class Authorized extends \lithium\core\StaticObject {
 	public static function get($configName, $forceCheck = false, $options = array()){
 		$defaults = array('retrieve' => true, 'field' => null);
 		$options += $defaults;
+		if (!($config = static::_config($configName))) {
+			return;
+		}
 		if (!isset(static::$_users[$configName])) {
 			static::$_users[$configName] = null;
 			$forceCheck = true;
 		}
+		extract($options, EXTR_SKIP);
 		if ($forceCheck) {
-			if ($config = static::_config($configName)) {
-				$persist = !empty($config['persist']);
-				$user = Auth::check($config['auth']['name'], $persist);
-				static::set($configName, $user, $options);
+			$user = Auth::check($config['auth']['name']);
+			if (!$user && !empty($config['persist'])) {
+				$user = Auth::check($config['persist']['name'], true);
+			}		
+			if ($user) {
+				static::set($configName, $user, $options);	
 			}
 		}
 		if (static::$_users[$configName]) {
-			if ($options['field'] && isset(static::$_users[$configName][$options['field']])) {
-				return static::$_users[$configName][$options['field']];
+			if ($field && isset(static::$_users[$configName][$field])) {
+				return static::$_users[$configName][$field];
 			}
 		}
 		return static::$_users[$configName];
@@ -169,11 +175,14 @@ class Authorized extends \lithium\core\StaticObject {
 	 * @return boolean
 	 */
 	public static function set($configName, $user, $options = array()){
-		$defaults = array('persist' => null, 'retrieve' => true);
+		$defaults = array('persist' => false, 'retrieve' => true);
 		$options += $defaults;
 		if ($config = static::_config($configName)) {
 			extract($options, EXTR_SKIP);
-			static::$_users[$configName] = Auth::set($config['auth']['name'], $user, compact('persist'));
+			if ($persist && !empty($config['persist'])) {
+				$user = Auth::set($config['persist']['name'], $user);
+			}
+			static::$_users[$configName] = Auth::set($config['auth']['name'], $user);
 			if ($retrieve && $user) {
 				$dataPath = $retrieve === true ? null : "$retrieve";
 				static::retrieve($configName, $dataPath, true);
@@ -194,13 +203,12 @@ class Authorized extends \lithium\core\StaticObject {
 	 */
 	public static function login($configName, $userCredentials, $options = array()){
 		$defaults = array('persist' => false, 'retrieve' => true);
-		$options += $defaults;
+		$options += $defaults;	
 		if ($config = static::_config($configName)) {
-			extract($options, EXTR_SKIP);
-			$persist = $persist && !empty($config['persist']);
-			$user = Auth::check($config['auth']['name'], $userCredentials, compact('persist'));
-			static::set($configName, $user, $options);
-			return static::get($configName);
+			if ($user = Auth::check($config['auth']['name'], $userCredentials)) {
+				static::set($configName, $user, $options);
+				return static::get($configName, $options);	
+			}
 		}
 	}
 
@@ -212,12 +220,15 @@ class Authorized extends \lithium\core\StaticObject {
 	 * @return boolean true | null
 	 */
 	public static function logout($configName, $options = array()){
-		$defaults = array('eliminate' => true);
+		$defaults = array('persist' => true, 'eliminate' => true);
 		$options += $defaults;
 		if ($config = static::_config($configName)) {
 			extract($options, EXTR_SKIP);
 			if ($eliminate) {
 				static::eliminate($configName);
+			}
+			if ($persist && !empty($config['persist'])) {
+				Auth::clear($config['persist']['name']);
 			}
 			Auth::clear($config['auth']['name']);
 			return true;

@@ -28,7 +28,7 @@ $config = array(
 	 *    for the processes run by this library
 	 *  - password the name of the password field, this is double
 	 *    confirmed on registration by default & is the field
-	 *    that gets reset on assword reset action
+	 *    that gets reset on password reset action
 	 *  - token name of the token field the token is used as a
 	 *    identifer for the user throughout various auth
 	 *    processes, by default it chnages when a user logs in
@@ -110,7 +110,7 @@ $config = array(
 	 *  - name auth configuration name to use/create
 	 *  - {s} keys as per auth adapter
 	 *
-	 * Note when config is created the option 'model' is overidden to
+	 * Note: when config is created the option 'model' is overidden to
 	 * match model specifified above and 'adapater' is set to Form.
 	 * When creating the auth configs if one exists with the name
 	 * specified it will not be recreated but used as is
@@ -118,16 +118,33 @@ $config = array(
 	'auth' => array(),
 
 	/**
-	 * Persist configuration for cookie
+	 * Persist Auth configuration (remember me)
 	 * false do not provide this feature | config array
 	 *  - name auth configuration name to use/create
-	 *  - encryptionSalt used to hash the cookie values string | null
-	 *  - {s} option keys as per session adapter
+	 *  - {s} option keys as per auth adapter
+	 *  
+	 * Note: sample config gives full config options pertaining to the
+	 * Persisted adapter, options here will be merged with 'auth' key
+	 * to assume the same model & session settings. 
+	 * The storage key is also optional, and can simply be a string name
+	 * of a configured Session.
+	 * 
+	 * {{{ 
+	 * array(
+	 *	'name' => 'persist',
+	 *	'session' => array('options' => array('name' => 'default')),
+	 *	'adapter' => 'Persisted',
+	 *	'storage' => array(
+	 *		'name' => 'cookie',
+	 *		'adapter' => 'Cookie',
+	 *		'strategies' => array(
+	 *			'Encrypt' => array('secret' => sha1(__FILE__))
+	 *		)
+	 *	)
+	 * )
+	 * }}}
+	 * 
+	 * 
 	 */
-	'persist' => array(
-		'name' => '__u',
-		'encryptionSalt' => sha1(__FILE__),
-		'adapter' => 'Cookie',
-		'expire' => '+2 weeks'
-	)
+	'persist' => array()
 );

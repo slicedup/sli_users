@@ -86,25 +86,37 @@ class Configure {
 		);
 		$session = static::_formatAdapter($name, 'session', $session, $sessionDefaults);
 		$authDefaults = array(
-			'model' => $model['class'],
 			'adapter' => 'Form',
-			'fields' =>  array('username', $model['password'])
+			'model' => $model['class'],
+			'fields' =>  array('username', $model['password']),
+			'session' => array('options' => array('name' => $session['name'])),
 		);
 		$auth = static::_formatAdapter($name, 'auth', $auth, $authDefaults);
 		$auth['session']['options']['name'] = $session['name'];
 
 		//set up persistence
 		if ($persist) {
+			
 			$persistDefaults = array(
-				'adapter' => 'Cookie'
+				'adapter' => 'Persisted',
+				'model' => $model['class'],
+				'fields' =>  array($model['token']),
+				'session' => array('options' => array('name' => $session['name'])),
 			);
-			$persist = static::_formatAdapter($name, 'persist', $persist, $persistDefaults);
-			if (array_key_exists('encryptionSalt', $persist)) {
-				$auth['encryptionSalt'] = $persist['encryptionSalt'];
-				unset($persist['encryptionSalt']);
+			
+			$p = "persist_{$name}";
+			$persist = static::_formatAdapter($p, 'persist', $persist, $persistDefaults);
+			
+			$storage = isset($persist['storage']) ? $persist['storage'] : 'persist';
+			if ($storage) {
+				$storageDefaults = array(
+					'name' => 'cookie',
+					'adapter' => 'Cookie'
+				);
+				$s = "storage_{$name}";
+				$storage = static::_formatAdapter($s, 'storage', $storage, $storageDefaults);
+				$persist['storage'] = $storage;	
 			}
-			$auth['storage']['options']['name'] = $persist['name'];
-			$auth['adapter'] = 'PersistentForm';
 		}
 		
 		$config = compact($configKeys);
@@ -143,13 +155,13 @@ class Configure {
 			$_sessions[$session['name']] = array();
 		}
 		$_sessions[$session['name']] += $session;
-		if ($persist) {
-			if (!isset($_sessions[$persist['name']])) {
-				$_sessions[$persist['name']] = array();
+		if ($persist) {			
+			$storage = $persist['storage'];
+			if (!isset($_sessions[$storage['name']])) {
+				$_sessions[$storage['name']] = array();
 			}
-			$_sessions[$persist['name']] += $persist;
+			$_sessions[$storage['name']] += $storage;
 		}
-		Session::config($_sessions);
 
 		//set up auth
 		$_auths = Auth::config();
@@ -157,6 +169,14 @@ class Configure {
 			$_auths[$auth['name']] = array();
 		}
 		$_auths[$auth['name']] += $auth;
+		if ($persist) {
+			if (!isset($_auths[$persist['name']])) {
+				$_auths[$persist['name']] = array();
+			}
+			unset($persist['storage']['adapter'], $persist['storage']['strategies']);
+			$_auths[$persist['name']] += $persist;
+		}
+		Session::config($_sessions);
 		Auth::config($_auths);
 	}
 
@@ -212,12 +232,12 @@ class Configure {
 		if (is_array($config)) {
 			$name = isset($config['name']) ? $config['name'] : $name;
 		} else {
-			$name = $config;
+			$name = ($config === true) ? $key : $config;
 			$config = array();
 		}
 		$config['name'] = $name;
 		if ($defaults) {
-			$config += $defaults;
+			$config = Set::merge($defaults, $config);
 		}
 		return $config;
 	}
