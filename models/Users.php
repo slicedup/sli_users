@@ -35,7 +35,7 @@ namespace sli_users\models;
  * 			unset($params['data']['new_password']);
  * 		}
  * 		if (!empty($record->new_password)) {
- * 			$record->password = String::hash($record->new_password);
+ * 			$record->password = Password::hash($record->new_password);
  * 		}
  * 		$params['entity'] = $record;
  * 		return $chain->next($self, $params, $chain);
