@@ -71,7 +71,6 @@ class Persisted extends \lithium\security\auth\adapter\Form {
 		foreach ($this->_fields as $key => $field) {
 			$persist[$key] = isset($data[$field]) ? $data[$field] : null;
 		}
-		var_dump(compact('persist'));
 		if ($persist == array_filter($persist)) {
 			if (!$this->_expose) {
 				$persist = array_values($persist);	
