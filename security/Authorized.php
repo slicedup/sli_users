@@ -10,7 +10,7 @@ namespace sli_users\security;
 
 use lithium\security\Auth;
 use lithium\storage\Session;
-use sli_util\storage\Registry;
+use sli_base\storage\Registry;
 
 /**
  * The `User` class provides basic actions with the current application user. It is intended

@@ -10,9 +10,9 @@ namespace sli_users\config;
 
 use lithium\core\Libraries;
 use lithium\util\Set;
-use sli_util\storage\Registry;
-use sli_util\util\Store;
-use sli_util\storage\Source;
+use sli_base\storage\Registry;
+use sli_base\util\Store;
+use sli_base\storage\Source;
 
 use lithium\security\Auth;
 use lithium\storage\Session;

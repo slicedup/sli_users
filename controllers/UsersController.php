@@ -9,10 +9,10 @@
 namespace sli_users\controllers;
 
 use lithium\core\Libraries;
-use sli_util\net\http\MediaPaths;
+use sli_base\net\http\Media;
 use lithium\util\Set;
-use sli_util\action\FlashMessage;
-use sli_util\storage\Registry;
+use sli_base\action\FlashMessage;
+use sli_base\storage\Registry;
 use sli_users\security\Authorized;
 
 /**
@@ -60,8 +60,8 @@ class UsersController extends \lithium\action\Controller {
 			if ($self->runtime) {
 				$self->_user =& Authorized::instance($self->runtime['name'], false,  $self->runtime['class']); 
 				$library = Libraries::get('sli_users');
-				MediaPaths::setDefaults('html');
-				MediaPaths::addPaths('html', array(
+				Media::setDefaults('html');
+				Media::addPaths('html', array(
 					'template' => array(
 						"{:library}/views/{$configKey}/{:template}.{:type}.php",
 						$library['path'] . '/views/{:controller}/{:template}.{:type}.php',
