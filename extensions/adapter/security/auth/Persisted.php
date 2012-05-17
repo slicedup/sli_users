@@ -85,7 +85,15 @@ class Persisted extends \lithium\security\auth\adapter\Form {
 		$class = $this->_classes['storage'];
 		$options += array('storage' => array());
 		$storage = $options['storage'] + $this->_storage;
-		$class::delete($this->_key, $storage);
+		$k = 0;
+		foreach ($this->_fields as $key => $field) {
+			if (!$this->_expose) {
+				$class::delete($this->_key . ".{$k}", $storage);
+			} else {
+				$class::delete($this->_key . ".{$key}", $storage);
+			}
+			$k++;
+		}
 	}
 }
 
