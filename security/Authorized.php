@@ -143,7 +143,7 @@ class Authorized extends \lithium\core\StaticObject {
 	 * @return mixed value of field
 	 */
 	public static function field($configName, $field, $value = null, $forceCheck = false){
-		if ($value && $user = static::get($configName, $forceCheck)) {
+		if (isset($value) && $user = static::get($configName, $forceCheck)) {
 			$user[$field] = $value;
 			return static::set($configName, $user);
 		}
