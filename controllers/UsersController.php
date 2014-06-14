@@ -27,10 +27,10 @@ class UsersController extends \lithium\action\Controller {
 	 * @var array
 	 */
 	public $runtime;
-	
+
 	/**
 	 * Runtime user instance
-	 * 
+	 *
 	 * @var object
 	 */
 	public $_user;
@@ -58,7 +58,7 @@ class UsersController extends \lithium\action\Controller {
 				}
 			}
 			if ($self->runtime) {
-				$self->_user =& Authorized::instance($self->runtime['name'], false,  $self->runtime['class']); 
+				$self->_user =& Authorized::instance($self->runtime['name'], false,  $self->runtime['class']);
 				$library = Libraries::get('sli_users');
 				Media::setDefaults('html');
 				Media::addPaths('html', array(

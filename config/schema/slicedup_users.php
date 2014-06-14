@@ -9,55 +9,55 @@
 //default schema, this is a straight var export from Model::schema()
 
 $schema = array (
-  'id' => 
+  'id' =>
   array (
     'type' => 'integer',
     'length' => 10,
     'null' => false,
     'default' => NULL,
   ),
-  'first_name' => 
+  'first_name' =>
   array (
     'type' => 'string',
     'length' => 128,
     'null' => false,
     'default' => NULL,
   ),
-  'last_name' => 
+  'last_name' =>
   array (
     'type' => 'string',
     'length' => 128,
     'null' => false,
     'default' => NULL,
   ),
-  'token' => 
+  'token' =>
   array (
     'type' => 'string',
     'length' => 36,
     'null' => false,
     'default' => NULL,
   ),
-  'active' => 
+  'active' =>
   array (
     'type' => 'boolean',
     'null' => false,
     'default' => '0',
   ),
-  'username' => 
+  'username' =>
   array (
     'type' => 'string',
     'length' => 24,
     'null' => false,
     'default' => NULL,
   ),
-  'password' => 
+  'password' =>
   array (
     'type' => 'string',
-    'length' => 48,
+    'length' => 64,
     'null' => false,
     'default' => NULL,
   ),
-  'email' => 
+  'email' =>
   array (
     'type' => 'string',
     'length' => 128,

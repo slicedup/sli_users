@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `token` varchar(36) NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '0',
   `username` varchar(24) NOT NULL,
-  `password` varchar(48) NOT NULL,
+  `password` varchar(64) NOT NULL,
   `email` varchar(128) NOT NULL,
   PRIMARY KEY (`id`)
 );

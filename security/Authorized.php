@@ -112,7 +112,7 @@ class Authorized extends \lithium\core\StaticObject {
 			return;
 		}
 		if (!isset(static::$_users[$configName])) {
-			static::$_users[$configName] = null;
+			static::$_users[$configName] = false;
 			$forceCheck = true;
 		}
 		extract($options, EXTR_SKIP);
@@ -120,9 +120,9 @@ class Authorized extends \lithium\core\StaticObject {
 			$user = Auth::check($config['auth']['name']);
 			if (!$user && !empty($config['persist'])) {
 				$user = Auth::check($config['persist']['name'], true);
-			}		
+			}
 			if ($user) {
-				static::set($configName, $user, $options);	
+				static::set($configName, $user, $options);
 			}
 		}
 		if (static::$_users[$configName]) {
@@ -203,11 +203,11 @@ class Authorized extends \lithium\core\StaticObject {
 	 */
 	public static function login($configName, $userCredentials, $options = array()){
 		$defaults = array('persist' => false, 'retrieve' => true);
-		$options += $defaults;	
+		$options += $defaults;
 		if ($config = static::_config($configName)) {
 			if ($user = Auth::check($config['auth']['name'], $userCredentials)) {
 				static::set($configName, $user, $options);
-				return static::get($configName, $options);	
+				return static::get($configName, $options);
 			}
 		}
 	}

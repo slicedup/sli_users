@@ -13,7 +13,7 @@ namespace sli_users\extensions\adapter\security\auth;
  * in a user specific persistent storage source, most commonly a browser cookie, against a database.
  */
 class Persisted extends \lithium\security\auth\adapter\Form {
-	
+
 	/**
 	 * Dynamic class dependencies.
 	 *
@@ -22,16 +22,16 @@ class Persisted extends \lithium\security\auth\adapter\Form {
 	protected $_classes = array(
 		'storage' => 'lithium\storage\Session'
 	);
-	
+
 	protected $_storage = array();
-	
+
 	protected $_key = '';
-	
+
 	protected $_expose = false;
-	
+
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param array $config
 	 */
 	public function __construct(array $config = array()) {
@@ -44,7 +44,7 @@ class Persisted extends \lithium\security\auth\adapter\Form {
 		$config += $defaults;
 		parent::__construct($config + $defaults);
 	}
-	
+
 	public function check($credentials = null, array $options = array()) {
 		$class = $this->_classes['storage'];
 		$options += array('storage' => array());
@@ -56,13 +56,13 @@ class Persisted extends \lithium\security\auth\adapter\Form {
 			if ($this->_expose) {
 				$credentials->data = $persisted;
 			} else {
-				$credentials->data = array_combine($this->_fields, $persisted);	
+				$credentials->data = array_combine($this->_fields, $persisted);
 			}
 			return parent::check($credentials, $options);
 		}
 		return false;
 	}
-	
+
 	public function set($data, array $options = array()) {
 		$class = $this->_classes['storage'];
 		$options += array('storage' => array());
@@ -73,14 +73,14 @@ class Persisted extends \lithium\security\auth\adapter\Form {
 		}
 		if ($persist == array_filter($persist)) {
 			if (!$this->_expose) {
-				$persist = array_values($persist);	
+				$persist = array_values($persist);
 			}
 			$class::write($this->_key, $persist, $storage);
 			return $data;
 		}
-		
+
 	}
-	
+
 	public function clear(array $options = array()) {
 		$class = $this->_classes['storage'];
 		$options += array('storage' => array());
